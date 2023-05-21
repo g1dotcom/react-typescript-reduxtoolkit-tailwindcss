@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import CryptoSummary from "../cryptoSummary/CryptoSummary";
 import { Crypto } from "../../Types";
+import moment from "moment";
 
 import {
   Chart as ChartJS,
@@ -46,7 +47,7 @@ const AllCoins = () => {
 
   useEffect(() => {
     const url =
-      "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&locale=en";
+      "http://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&locale=en";
     axios.get(url).then((response) => {
       setCryptos(response.data);
     });
@@ -61,13 +62,13 @@ const AllCoins = () => {
             setSelected(c);
             axios
               .get(
-                `https://api.coingecko.com/api/v3/coins/${c?.id}/market_chart?vs_currency=usd&days=30&interval=daily`
+                `http://api.coingecko.com/api/v3/coins/${c?.id}/market_chart?vs_currency=usd&days=30&interval=daily`
               )
               .then((response) => {
                 console.log(response.data);
                 setData({
                   labels: response.data.prices.map((price: number[]) => {
-                    return price[0];
+                    return moment.unix(price[0] / 1000).format("MM-DD");
                   }),
                   datasets: [
                     {
