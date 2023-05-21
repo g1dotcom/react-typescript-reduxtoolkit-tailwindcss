@@ -3,9 +3,46 @@ import axios from "axios";
 import CryptoSummary from "../cryptoSummary/CryptoSummary";
 import { Crypto } from "../../Types";
 
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+
+import { Line } from "react-chartjs-2";
+import type { ChartData, ChartOptions } from "chart.js";
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
+
 const AllCoins = () => {
   const [cryptos, setCryptos] = useState<Crypto[] | null>(null);
   const [selected, setSelected] = useState<Crypto | null>();
+  const [data, setData] = useState<ChartData<"line">>();
+  const [options, setOptions] = useState<ChartOptions<"line">>({
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top" as const,
+      },
+      title: {
+        display: true,
+        text: "Chart.js Line Chart",
+      },
+    },
+  });
 
   useEffect(() => {
     const url =
@@ -22,6 +59,28 @@ const AllCoins = () => {
           onChange={(e) => {
             const c = cryptos?.find((x) => x.id === e.target.value);
             setSelected(c);
+            axios
+              .get(
+                `https://api.coingecko.com/api/v3/coins/${c?.id}/market_chart?vs_currency=usd&days=30&interval=daily`
+              )
+              .then((response) => {
+                console.log(response.data);
+                setData({
+                  labels: response.data.prices.map((price: number[]) => {
+                    return price[0];
+                  }),
+                  datasets: [
+                    {
+                      label: "Dataset 1",
+                      data: response.data.prices.map((price: number[]) => {
+                        return price[1];
+                      }),
+                      borderColor: "rgb(255, 99, 132)",
+                      backgroundColor: "rgba(255, 99, 132, 0.5)",
+                    },
+                  ],
+                });
+              });
           }}
           defaultValue="default"
         >
@@ -38,6 +97,11 @@ const AllCoins = () => {
         </select>
       </div>
       {selected ? <CryptoSummary crypto={selected} /> : null}
+      {data ? (
+        <div className="w-[600px]">
+          <Line options={options} data={data} />{" "}
+        </div>
+      ) : null}
     </>
   );
 };
