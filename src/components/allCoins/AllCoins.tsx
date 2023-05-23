@@ -123,7 +123,7 @@ xhr.send();
               })
             : null}
         </select>
-        <select onChange={(e)=> {
+        <select className="bg-gray-100" onChange={(e)=> {
          setRange(parseInt(e.target.value))
         }} >
             <option value={30} >30 Days</option>
