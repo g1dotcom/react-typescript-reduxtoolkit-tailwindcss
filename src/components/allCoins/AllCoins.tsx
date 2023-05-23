@@ -29,6 +29,13 @@ ChartJS.register(
 );
 
 const AllCoins = () => {
+
+  var xhr = new XMLHttpRequest();
+xhr.open('GET', 'https://api.example.com/data', true);
+xhr.setRequestHeader('Access-Control-Allow-Origin', 'https://localhost:3000');
+xhr.send();
+
+
   const [cryptos, setCryptos] = useState<Crypto[] | null>(null);
   const [selected, setSelected] = useState<Crypto | null>();
 
@@ -39,7 +46,7 @@ const AllCoins = () => {
     responsive: true,
     plugins: {
       legend: {
-        position: "top" as const,
+       display: false,
       },
       title: {
         display: true,
@@ -57,6 +64,7 @@ const AllCoins = () => {
   }, []);
 
   useEffect(() => {
+    if(!selected) return;
     axios
     .get(
       `https://api.coingecko.com/api/v3/coins/${selected?.id}/market_chart?vs_currency=usd&days=${range}&${range === 1 ? "interval=hourly" : "interval=daily"}`
@@ -78,6 +86,18 @@ const AllCoins = () => {
           },
         ],
       });
+      setOptions({
+        responsive: true,
+        plugins: {
+          legend: {
+           display: false,
+          },
+          title: {
+            display: true,
+            text: `Price over last ` + range + (range === 1 ? " Day." : " Days ") + ` of ${selected?.name} in USD`,
+          },
+        },
+      })
     });
   },[selected,range])
 
@@ -106,8 +126,8 @@ const AllCoins = () => {
         <select onChange={(e)=> {
          setRange(parseInt(e.target.value))
         }} >
-            <option value={29} >30 Days</option>
-            <option value={6}>7 Days</option>
+            <option value={30} >30 Days</option>
+            <option value={7}>7 Days</option>
             <option value={1}>1 Days</option>
         </select>
       </div>
